@@ -54,7 +54,7 @@
 
 In this document we outline the basics of getting set up with certain dependencies, compiling, and using \mesc. We also give details on what is actually calculated, including equations, methods, explanations, etc., of the way certain things are implemented. We also include some consistency tests at the end using analytic metrics.
 
-
+See the README for simple instructions to get started. We elaborate on some of these details here.
 
 \tableofcontents
 
@@ -70,7 +70,19 @@ In \mesc\texttt{/tools/} directory we include a Python script \texttt{split\_HDF
 
 First, run this script from your simulation directory. Note this might take a while for larger simulations, however, it only needs to be done once. 
 
-See the README for simple instructions to get started. We elaborate on some of these details here.
+\subsection{Minimal data requirements}
+
+\mesc\ requires the following data as input to work:
+\begin{itemize}
+	\item spatial metric $\gam_{ij}$
+	\item extrinsic curvature $K_{ij}$
+	\item lapse function $\alp$
+	\item rest-frame density $\rho$ (as defined in \texttt{HydroBase})
+	\item 3--velocity $v^i$ (as defined in \texttt{HydroBase})
+\end{itemize}
+Please ensure you have the appropriate 3D output from the ET before proceeding.
+
+
 %----------------------------------
 \subsection{Dependencies}
 %----------------------------------
