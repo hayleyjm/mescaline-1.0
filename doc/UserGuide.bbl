@@ -1,0 +1,43 @@
+\begin{thebibliography}{}
+
+\bibitem[{Baumgarte} and {Shapiro}, 1999]{baumgarte1999}
+{Baumgarte}, T.~W. and {Shapiro}, S.~L. (1999).
+\newblock {Numerical integration of Einstein's field equations}.
+\newblock {\em \prd}, 59(2):024007.
+
+\bibitem[{Buchert} et~al., 2018]{buchert2018b}
+{Buchert}, T., {Mourier}, P., and {Roy}, X. (2018).
+\newblock {Cosmological backreaction and its dependence on spacetime
+  foliation}.
+\newblock {\em Classical and Quantum Gravity}, 35(24):24LT02.
+
+\bibitem[{Buchert} et~al., 2019]{buchert2019}
+{Buchert}, T., {Mourier}, P., and {Roy}, X. (2019).
+\newblock On average properties of inhomogeneous fluids in general relativity
+  iii: General fluid cosmologies.
+\newblock {\em arXiv e-prints}, page arXiv:1912.04213.
+
+\bibitem[{Macpherson}, 2019]{macpherson2019c}
+{Macpherson}, H.~J. (2019).
+\newblock {Inhomogeneous cosmology in an anisotropic Universe}.
+\newblock {\em arXiv e-prints}, page arXiv:1910.13380.
+
+\bibitem[{Macpherson} et~al., 2018]{macpherson2018b}
+{Macpherson}, H.~J., {Lasky}, P.~D., and {Price}, D.~J. (2018).
+\newblock {The Trouble with Hubble: Local versus Global Expansion Rates in
+  Inhomogeneous Cosmological Simulations with Numerical Relativity}.
+\newblock {\em \apjl}, 865:L4.
+
+\bibitem[{Macpherson} et~al., 2019]{macpherson2019b}
+{Macpherson}, H.~J., {Price}, D.~J., and {Lasky}, P.~D. (2019).
+\newblock {Einstein's Universe: Cosmological structure formation in numerical
+  relativity}.
+\newblock {\em \prd}, 99(6):063522.
+
+\bibitem[{Shibata} and {Nakamura}, 1995]{shibata1995}
+{Shibata}, M. and {Nakamura}, T. (1995).
+\newblock {Evolution of three-dimensional gravitational waves: Harmonic slicing
+  case}.
+\newblock {\em \prd}, 52:5428--5444.
+
+\end{thebibliography}
