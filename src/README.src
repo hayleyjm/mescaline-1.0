@@ -1,0 +1,6 @@
+## The directories here are organised based on different applications of mescaline
+
+## see the individual README files in each src directory for more info
+
+## each src directory (with the exception of tyrosine/) has its own options_<dirname>.f90 file which must be changed according to your choices before compiling
+## ensure all options in this file are consistent with your simulation

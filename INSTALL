@@ -1,0 +1,6 @@
+To compile:
+1. Download SPLASH and set SPLASH_DIR=/path/to/splash
+2. Set HDF5ROOT to location of installed HDF5
+3. Type `make'
+
+See the README and the doc/UserGuide for more details

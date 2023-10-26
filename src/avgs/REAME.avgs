@@ -1,0 +1,11 @@
+#
+# Mescaline spatial averaging
+#
+
+# The code in this directory is pieces of mescaline used only in calculating spatial averages
+#       uses the fluid-intrinsic averaging formalism of Buchert, Mourier, & Roy (2019; arXiv:1912.04213)
+#  see the documentation for details
+
+# The code here requires and relies on that in src/tyrosine/
+
+# Change options_avgs.f90 as in *this directory only*
