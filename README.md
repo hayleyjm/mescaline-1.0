@@ -21,11 +21,11 @@ export SPLASH_DIR=/path/to/splash
 ```
 export HDF5ROOT=/usr/local
 ```
-* Type make for "regular" mescaline
+* Type make in the mescaline/ directory
 ```
 make
 ```
-* See User Guide for full list of other available executables
+* See doc/UserGuide.pdf for more details
 
 
 ### Usage ###
@@ -34,7 +34,10 @@ make
 ```
 bin/mescaline *.hdf5
 ```
-* NOTE: Ensure you ``make clean'' and re-compile if changing any options in src/options.f90
+
+* Files must be in ``iteration-chunked'' format. See the User Guide for details. 
+
+* Ensure you ``make clean'' and re-compile if changing anything in your options file.
 
 
 
@@ -43,4 +46,4 @@ bin/mescaline *.hdf5
 * Shift vector \beta^i = 0 throughout
 * Uniform grid dx = dy = dz (nx = ny = nz)
 * Periodic boundary conditions implemented for all derivatives
-* See the User Guide in doc/ for more details
+* See the User Guide for more details
