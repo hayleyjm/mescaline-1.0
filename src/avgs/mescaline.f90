@@ -186,7 +186,7 @@ program mescaline
                    ! allocate memory for all-time arrays
                    !
                    ! if we come into this loop more than once, need to deallocate
-                   if (allocated(kij)) deallocate(kij,vel0,vel1,vel2)!,rho,dens)
+                   if (allocated(kij)) deallocate(gij,kij,vel0,vel1,vel2)!,rho,dens)
                    allocate(gij(6,nx,nx,nx,nfiles),kij(6,nx,nx,nx,nfiles),vel0(nx,nx,nx,nfiles),&
                       & vel1(nx,nx,nx,nfiles),vel2(nx,nx,nx,nfiles))!,rho(nx,nx,nx,nfiles),dens(nx,nx,nx,nfiles))
 
