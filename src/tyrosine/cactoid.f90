@@ -82,7 +82,7 @@ contains
     call extract_data(ncells,ncol,n,iamtype,dx,xmin,xmax,blocklabel,nx,gij,&
       & kij,alp,vel0,vel1,vel2,rho,dens)
 
-    deallocate(dat)
+    deallocate(dat,iamtype) ! HM 26/11/23
     call close_cactus_hdf5_file(ierr)
 
   end subroutine read_cactus_file
@@ -127,6 +127,12 @@ contains
     !
     if (allocated(alp)) deallocate(alp) ! safeguard because we don't deallocate this every time in cactoid
     if (allocated(gij)) deallocate(gij)
+    if (allocated(kij)) deallocate(kij) ! HM 26/11/23 added below lines
+    if (allocated(vel0)) deallocate(vel0)
+    if (allocated(vel1)) deallocate(vel1)
+    if (allocated(vel2)) deallocate(vel2)
+    if (allocated(rho)) deallocate(rho)
+    if (allocated(dens)) deallocate(dens)
     allocate(gij(6,nx,nx,nx),alp(nx,nx,nx),kij(6,nx,nx,nx),vel0(nx,nx,nx),vel1(nx,nx,nx),&
          vel2(nx,nx,nx),rho(nx,nx,nx),dens(nx,nx,nx))
 
