@@ -128,6 +128,7 @@ contains
     integer(HSIZE_T), dimension(drank) :: dims ! Dataset dimensions
 
     integer :: err,n,idx
+    character(len=clen) :: loc = " read_hdf5"
 
     ! ============================================================
     !
@@ -135,7 +136,7 @@ contains
     !
     ! ============================================================
     call h5open_f(err)
-
+    if (err/=0) call print_error("Could not intialise HDF5 interface",2,loc)
     ! ============================================================
     !
     ! Create a new file with default properties
@@ -324,6 +325,132 @@ contains
     call h5close_f(err)
 
   end subroutine write_hdf5
+
+
+
+
+
+    !
+    ! a subroutine to read HDF5 output data
+    !      ** written for the cg LTB test, should(?) work for any HDF5 data
+    !     EXCEPT for the ET output HDF5 data which is split weirdly -- need splash routines for that
+    !
+    ! this routine written with help from
+    !      https://testsubjector.github.io/blog/2020/09/30/A-Primer-On-HDF5-File-Reading-In-Fortran-90
+    !
+    subroutine read_hdf5(nx,ndat,filename,descriptors,datas)
+      use hdf5
+      integer, intent(in) :: nx,ndat                   ! current iteration and number of arrays we are writing
+      character(len=*), intent(in) :: filename            ! name of the file
+      character(len=*), dimension(ndat), intent(in) :: descriptors   ! a char. array of the names of the datasets
+      !
+      real(c_double), intent(out) :: datas(ndat,nx,nx,nx)   ! an array of the 3D data to read from the file
+
+      !
+      ! various things we need to open the file/dataspaces/datasets to do with the data itself
+      !
+      !         (types here are to correspond with the C types we need)
+      !
+      integer(HID_T) :: file_id                      ! the ID of the HDF5 file
+      integer(HID_T) :: dset_ids(ndat)              ! the ID of the ndat datasets, and the single dataspace for all ndat
+      !
+      ! we're going to ignore the attributes
+      !
+      !
+      ! some things about the data itself to store in the datasets
+      !
+      integer, parameter :: drank = 3                                      ! rank of the datasets
+      integer(HSIZE_T), dimension(drank) :: dims ! Dataset dimensions
+
+      integer :: err,n,idx
+      character(len=clen) :: loc = " read_hdf5"
+
+      dims = (/ nx, nx, nx /)
+
+      ! ============================================================
+      !
+      ! Initialize HDF5 FORTRAN interface.
+      !
+      ! ============================================================
+      call h5open_f(err)
+      if (err/=0) call print_error("Could not intialise HDF5 interface",2,loc)
+
+      ! ============================================================
+      !
+      ! Open the file
+      !
+      ! ============================================================
+      call h5fopen_f(filename, H5F_ACC_RDONLY_F, file_id, err)
+      if (err/=0) then
+         print*, ' ERROR opening file: ', filename
+         call print_error("Stopping.",2,loc)
+      endif
+
+      ! ============================================================
+      !
+      ! Open the group and datasets and read the 3D data itself
+      !
+      ! ============================================================
+
+      ! ------------------------------------------
+      ! Open the group in which the data lives
+      !
+      ! from h5dump <filename> (written using write_hdf5 in here)
+      !GROUP "/" {
+      !    DATASET "Ar" {
+      !        DATATYPE  H5T_IEEE_F64LE
+      !        DATASPACE  SIMPLE { ( 32, 32, 32 ) / ( 32, 32, 32 ) }
+      !        DATA { ...
+
+      ! ------------------------------------------
+      ! can maybe skip this step and just open the dataset
+      !call h5gopen_f(file_id, "/", root_id, ErrorFlag)
+
+      ! -----------------------------------------
+      ! Loop over datasets (ndat) and open each one to put it into data array
+      ! -----------------------------------------
+      do n=1,ndat
+
+          ! Open the existing dataset
+          call h5dopen_f(file_id, descriptors(n), dset_ids(n), err)
+          if (err/=0) then
+              print*, ' Error opening dataset: ',descriptors(n)
+              call print_error('Exiting',2,loc)
+          endif
+
+          ! Get the data
+          call h5dread_f(dset_ids(n), H5T_NATIVE_DOUBLE, datas(n,:,:,:), dims, err)
+          if (err/=0) then
+              print*, ' Error getting data from dataset: ',descriptors(n)
+              call print_error('Exiting',2,loc)
+          endif
+
+          ! Close the dataset
+          call h5dclose_f(dset_ids(n), err)
+          if (err/=0) then
+              print*, ' Error closing dataset: ',descriptors(n)
+              call print_error('Exiting',2,loc)
+          endif
+
+      enddo
+
+      ! ============================================================
+      !
+      ! Close the file.
+      !
+      ! ============================================================
+      call h5fclose_f(file_id, err)
+
+      ! ============================================================
+      !
+      ! Close FORTRAN HDF5 interface.
+      !
+      ! ============================================================
+      call h5close_f(err)
+
+  end subroutine read_hdf5
+
+
 
 
 

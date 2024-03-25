@@ -1863,5 +1863,37 @@ contains
   end subroutine get_expansion_shear_vort
 
 
+  !
+  ! A cute little subroutine to get dialp in a spatial loop
+  !       -- i.e. when we want to hide the derivative calls + the periodic bc implementation
+  !
+  subroutine get_dialp(nx,dx,i,j,k,alp,dialp)
+      integer, intent(in) :: nx,i,j,k ! grid size and index position
+      real(c_double), intent(in) :: dx,alp(nx,nx,nx)
+      real(c_double), intent(out) :: dialp(3)
+
+      real(c_double) :: dxalp,dyalp,dzalp
+      real(c_double) :: alpip1,alpip2,alpim1,alpim2,alpjp1,&
+        & alpjp2,alpjm1,alpjm2,alpkp1,alpkp2,alpkm1,alpkm2
+      integer :: ip1,ip2,im1,im2,jp1,jp2,jm1,jm2,kp1,kp2,km1,km2
+
+      call apply_periodic(i,ip1,im1,nx)
+      call apply_periodic(j,jp1,jm1,nx)
+      call apply_periodic(k,kp1,km1,nx)
+      call apply_periodic_fourth(i,ip2,im2,nx)
+      call apply_periodic_fourth(j,jp2,jm2,nx)
+      call apply_periodic_fourth(k,kp2,km2,nx)
+
+      !
+      ! get \partial \alp
+      !
+      dxalp = deriv1fourth(alpip1,alpip2,alpim1,alpim2,dx)
+      dyalp = deriv1fourth(alpjp1,alpjp2,alpjm1,alpjm2,dx)
+      dzalp = deriv1fourth(alpkp1,alpkp2,alpkm1,alpkm2,dx)
+      dialp = (/ dxalp, dyalp, dzalp /)  ! \partial_i (alp)
+
+  end subroutine get_dialp
+
+
 
 end module roots
