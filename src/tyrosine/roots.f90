@@ -1867,8 +1867,8 @@ contains
   ! A cute little subroutine to get dialp in a spatial loop
   !       -- i.e. when we want to hide the derivative calls + the periodic bc implementation
   !
-  subroutine get_dialp(nx,dx,i,j,k,alp,dialp)
-      integer, intent(in) :: nx,i,j,k ! grid size and index position
+  subroutine get_dialp(nx,dx,ipos,jpos,kpos,alp,dialp)
+      integer, intent(in) :: nx,ipos,jpos,kpos ! grid size and index position
       real(c_double), intent(in) :: dx,alp(nx,nx,nx)
       real(c_double), intent(out) :: dialp(3)
 
@@ -1877,12 +1877,26 @@ contains
         & alpjp2,alpjm1,alpjm2,alpkp1,alpkp2,alpkm1,alpkm2
       integer :: ip1,ip2,im1,im2,jp1,jp2,jm1,jm2,kp1,kp2,km1,km2
 
-      call apply_periodic(i,ip1,im1,nx)
-      call apply_periodic(j,jp1,jm1,nx)
-      call apply_periodic(k,kp1,km1,nx)
-      call apply_periodic_fourth(i,ip2,im2,nx)
-      call apply_periodic_fourth(j,jp2,jm2,nx)
-      call apply_periodic_fourth(k,kp2,km2,nx)
+      call apply_periodic(ipos,ip1,im1,nx)
+      call apply_periodic(jpos,jp1,jm1,nx)
+      call apply_periodic(kpos,kp1,km1,nx)
+      call apply_periodic_fourth(ipos,ip2,im2,nx)
+      call apply_periodic_fourth(jpos,jp2,jm2,nx)
+      call apply_periodic_fourth(kpos,kp2,km2,nx)
+
+      alpip1 = alp(ip1,jpos,kpos)
+      alpim1 = alp(im1,jpos,kpos)
+      alpjp1 = alp(ipos,jp1,kpos)
+      alpjm1 = alp(ipos,jm1,kpos)
+      alpkp1 = alp(ipos,jpos,kp1)
+      alpkm1 = alp(ipos,jpos,km1)
+
+      alpip2 = alp(ip2,jpos,kpos)
+      alpim2 = alp(im2,jpos,kpos)
+      alpjp2 = alp(ipos,jp2,kpos)
+      alpjm2 = alp(ipos,jm2,kpos)
+      alpkp2 = alp(ipos,jpos,kp2)
+      alpkm2 = alp(ipos,jpos,km2)
 
       !
       ! get \partial \alp
