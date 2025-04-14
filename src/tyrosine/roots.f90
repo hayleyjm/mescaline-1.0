@@ -33,7 +33,7 @@ contains
 
         real(c_double), intent(out) :: gamijk(3,3,3,nx,nx,nx),tracek(nx,nx,nx)
 
-        real(c_double) :: gdown(3,3)
+        real(c_double) :: gdown(3,3),gup(3,3),detg
         integer :: i,j,k,l,m,n
 
         !$omp parallel do default (none) &
@@ -44,19 +44,23 @@ contains
 
               do i=1,nx
                   !
+                  ! calculate tracek
+                  call get_metric_at_pos(i,j,k,nx,gij,gdown)
+                  tracek(i,j,k) = trace(kij(:,i,j,k),gdown)
+                  !
+                  ! invert gdown to pass into christofel and save number of inv3x3 calls
+                  call inv3x3(gdown,gup,detg)
+
+                  !
                   ! Loop over components of Christoffel symbols
                   do l=1,3
                       do m=1,3
                           do n=1,3
                               call get_christoffel(i,j,k,gij,nx,dx,l,m,n,&
-                              & gamijk(l,m,n,i,j,k))
+                              & gamijk(l,m,n,i,j,k),gup)
                           enddo
                       enddo
                   enddo
-                  !
-                  ! calculate tracek
-                  call get_metric_at_pos(i,j,k,nx,gij,gdown)
-                  tracek(i,j,k) = trace(kij(:,i,j,k),gdown)
 
                 enddo
             enddo
@@ -227,30 +231,30 @@ contains
 
            !
            ! SECOND TERM
-           select case (ridx1)
+           select case (ridx2)
            case(1)
                !
                ! take the x-derivative of christoffel, get at i-stencil
-               gamma2_p1 = Chrsijk(l,l,ridx2,ip1,j,k)
-               gamma2_m1 = Chrsijk(l,l,ridx2,im1,j,k)
-               gamma2_p2 = Chrsijk(l,l,ridx2,ip2,j,k)
-               gamma2_m2 = Chrsijk(l,l,ridx2,im2,j,k)
+               gamma2_p1 = Chrsijk(l,l,ridx1,ip1,j,k)
+               gamma2_m1 = Chrsijk(l,l,ridx1,im1,j,k)
+               gamma2_p2 = Chrsijk(l,l,ridx1,ip2,j,k)
+               gamma2_m2 = Chrsijk(l,l,ridx1,im2,j,k)
 
            case(2)
                !
                ! take the y-derivaitve of christoffel, get at j-stencil
-               gamma2_p1 = Chrsijk(l,l,ridx2,i,jp1,k)
-               gamma2_m1 = Chrsijk(l,l,ridx2,i,jm1,k)
-               gamma2_p2 = Chrsijk(l,l,ridx2,i,jp2,k)
-               gamma2_m2 = Chrsijk(l,l,ridx2,i,jm2,k)
+               gamma2_p1 = Chrsijk(l,l,ridx1,i,jp1,k)
+               gamma2_m1 = Chrsijk(l,l,ridx1,i,jm1,k)
+               gamma2_p2 = Chrsijk(l,l,ridx1,i,jp2,k)
+               gamma2_m2 = Chrsijk(l,l,ridx1,i,jm2,k)
 
            case(3)
                !
                ! take the z-derivaitve of christoffel, get at j-stencil
-               gamma2_p1 = Chrsijk(l,l,ridx2,i,j,kp1)
-               gamma2_m1 = Chrsijk(l,l,ridx2,i,j,km1)
-               gamma2_p2 = Chrsijk(l,l,ridx2,i,j,kp2)
-               gamma2_m2 = Chrsijk(l,l,ridx2,i,j,km2)
+               gamma2_p1 = Chrsijk(l,l,ridx1,i,j,kp1)
+               gamma2_m1 = Chrsijk(l,l,ridx1,i,j,km1)
+               gamma2_p2 = Chrsijk(l,l,ridx1,i,j,kp2)
+               gamma2_m2 = Chrsijk(l,l,ridx1,i,j,km2)
 
             end select
             term2 = term2 + deriv1fourth(gamma2_p1,gamma2_p2,gamma2_m1,gamma2_m2,dx)
@@ -309,30 +313,30 @@ contains
 
            !
            ! SECOND TERM
-           select case (ridx1)
+           select case (ridx2)
            case(1)
                !
                ! take the x-derivative of christoffel, get at i-stencil
-               call get_christoffel(ip1,j,k,gij,nx,dx,l,l,ridx2,gamma2_p1)
-               call get_christoffel(im1,j,k,gij,nx,dx,l,l,ridx2,gamma2_m1)
-               call get_christoffel(ip2,j,k,gij,nx,dx,l,l,ridx2,gamma2_p2)
-               call get_christoffel(im2,j,k,gij,nx,dx,l,l,ridx2,gamma2_m2)
+               call get_christoffel(ip1,j,k,gij,nx,dx,l,l,ridx1,gamma2_p1)
+               call get_christoffel(im1,j,k,gij,nx,dx,l,l,ridx1,gamma2_m1)
+               call get_christoffel(ip2,j,k,gij,nx,dx,l,l,ridx1,gamma2_p2)
+               call get_christoffel(im2,j,k,gij,nx,dx,l,l,ridx1,gamma2_m2)
 
            case(2)
                !
                ! take the y-derivaitve of christoffel, get at j-stencil
-               call get_christoffel(i,jp1,k,gij,nx,dx,l,l,ridx2,gamma2_p1)
-               call get_christoffel(i,jm1,k,gij,nx,dx,l,l,ridx2,gamma2_m1)
-               call get_christoffel(i,jp2,k,gij,nx,dx,l,l,ridx2,gamma2_p2)
-               call get_christoffel(i,jm2,k,gij,nx,dx,l,l,ridx2,gamma2_m2)
+               call get_christoffel(i,jp1,k,gij,nx,dx,l,l,ridx1,gamma2_p1)
+               call get_christoffel(i,jm1,k,gij,nx,dx,l,l,ridx1,gamma2_m1)
+               call get_christoffel(i,jp2,k,gij,nx,dx,l,l,ridx1,gamma2_p2)
+               call get_christoffel(i,jm2,k,gij,nx,dx,l,l,ridx1,gamma2_m2)
 
            case(3)
                !
                ! take the z-derivaitve of christoffel, get at j-stencil
-               call get_christoffel(i,j,kp1,gij,nx,dx,l,l,ridx2,gamma2_p1)
-               call get_christoffel(i,j,km1,gij,nx,dx,l,l,ridx2,gamma2_m1)
-               call get_christoffel(i,j,kp2,gij,nx,dx,l,l,ridx2,gamma2_p2)
-               call get_christoffel(i,j,km2,gij,nx,dx,l,l,ridx2,gamma2_m2)
+               call get_christoffel(i,j,kp1,gij,nx,dx,l,l,ridx1,gamma2_p1)
+               call get_christoffel(i,j,km1,gij,nx,dx,l,l,ridx1,gamma2_m1)
+               call get_christoffel(i,j,kp2,gij,nx,dx,l,l,ridx1,gamma2_p2)
+               call get_christoffel(i,j,km2,gij,nx,dx,l,l,ridx1,gamma2_m2)
 
             end select
             term2 = term2 + deriv1fourth(gamma2_p1,gamma2_p2,gamma2_m1,gamma2_m2,dx)
