@@ -38,7 +38,7 @@ contains
 
         !$omp parallel do default (none) &
         !$omp shared(nx,dx,gij,kij,gamijk,tracek) &
-        !$omp private(i,j,k,l,m,n,gdown)
+        !$omp private(i,j,k,l,m,n,gdown,gup,detg)
         do k=1,nx
            do j=1,nx
 
