@@ -1,6 +1,9 @@
-## The directories here are organised based on different applications of mescaline
+The directories here are organised based on different applications of mescaline
+See the individual README files in each src directory for more info
 
-## see the individual README files in each src directory for more info
+Each src directory has its own options_<dirname>.f90 file which must be changed according to your choices before compiling
 
-## each src directory (with the exception of tyrosine/) has its own options_<dirname>.f90 file which must be changed according to your choices before compiling
-## ensure all options in this file are consistent with your simulation
+Currently, only spatial averaging is available (avgs/). Expect more additions in the future!
+
+tyrosine/ contains code that all of the mescaline applications use
+(Tyrosine is essential to making mescaline work: https://en.wikipedia.org/wiki/Mescaline)
