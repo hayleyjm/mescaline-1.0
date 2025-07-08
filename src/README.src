@@ -6,4 +6,4 @@ Each src directory has its own options_<dirname>.f90 file which must be changed 
 Currently, only spatial averaging is available (avgs/). Expect more additions in the future!
 
 tyrosine/ contains code that all of the mescaline applications use
-(Tyrosine is essential to making mescaline work: https://en.wikipedia.org/wiki/Mescaline)
+(i.e., Tyrosine is essential to making mescaline work: https://en.wikipedia.org/wiki/Mescaline)
