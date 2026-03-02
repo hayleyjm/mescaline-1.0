@@ -19,6 +19,13 @@ BINDIR=../bin
 # Compiler and HDF5 library flags
 # -------------------------------------
 
+#
+# use SYSTEM=gfortran if no SYSTEM variable is set
+#
+ifndef SYSTEM
+    SYSTEM=gfortran
+endif
+
 # GNU compilers
 ifeq ($(SYSTEM), gfortran)
     FC=gfortran
