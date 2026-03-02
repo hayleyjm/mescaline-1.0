@@ -21,7 +21,7 @@ module ricci
     use tripreports, only:write_avg,write_hdf5
     use violation, only:constraint_violation_inloop,get_L1_constraint_violation,&
         & get_fluid_frame_constraints
-    use init, only:initialise,get_t0_data
+    use init, only:initialise
     use prints, only:print_info,print_error
     implicit none
 
@@ -56,7 +56,7 @@ contains
     real(c_double), dimension(4,4)         :: sigUUijk,wddijk,sigUdijk,sigddijk
     real(c_double), dimension(4,4)         :: fourRddijk,Elecddijk,ElecUdijk,gUUmunu
     real(c_double), dimension(nspheres)    :: hub,Qd,omegaQ
-    real(c_double), dimension(nspheres)    :: omegaR,omegam,vDbt0,aDb,rho0,delta
+    real(c_double), dimension(nspheres)    :: omegaR,omegam,aDb,delta
     real(c_double), dimension(3,nspheres)  :: randorigins
     real(c_double), dimension(13,3,3)      :: gdown_atstencil,kdown_atstencil,kud_atstencil
     real(c_double) :: fvelU_atstencil(13,3),dtudt,dtalp
@@ -73,11 +73,10 @@ contains
     real(c_double), dimension(:,:,:,:,:),   allocatable :: sigmadd,fourRdd,Aijdd,ElecUd,sigmaUd
     real(c_double), dimension(:,:,:,:,:,:),   allocatable :: gamijk
 
-    character(len=clen) :: rho0file,volt0file
     character(len=clen), allocatable :: descriptors(:)
     character(len=100) :: message,loc
 
-    integer :: k,j,i,it,unitr0,unitv0,ndat,ni
+    integer :: k,j,i,it,ndat,ni
     logical :: notearly  ! if True, then we calc \Theta. if False, it is too early (i.e. we can't take time derivs yet)
     loc      = "Ricci"   ! routine location for info/errors
     notearly = .False.
@@ -124,15 +123,7 @@ contains
     ! -----------------------------------------------------
     time = times(nt) ! the current time
     call initialise(nx,nspheres,rad,time,xmin,xmax,dx,gotrho,xvals,randorigins,dt,&
-         & it,notearly,volt0file,rho0file)
-
-    ! -----------------------------------------------------
-    !
-    ! get initial data vol(t=0) and rho(t=0) (do we even need rho0?)
-    !
-    ! -----------------------------------------------------
-    vDbt0 = 0._dp
-    if (abs(time-tinitial) > eps_t) call get_t0_data(nspheres,rad,xmin,xmax,volt0file,rho0file,vDbt0,rho0)
+         & it,notearly)
 
     !
     ! initialise our averages
@@ -189,7 +180,7 @@ contains
     !$omp private(detgijk,thetaijk,sigma2ijk,sigddijk,sigUUijk,w2ijk,lorentzijk,rhoijk,rhoAij_ijk) &
     !$omp private(alpijk,fac,fac2,thetaavg,traceravg,rhoavg,tracekijk,tracerfluidijk,tracerijk) &
     !$omp private(theta2avg,sigma2avg,xi,xj,xk,vort2avg,wddijk,umuUijk,Esqijk) &
-    !$omp reduction(+:avgs,avgrho_allbox,avgrho_allbox_notilde,hub_allbox_notilde,avglorentz_allbox,vDbt0)
+    !$omp reduction(+:avgs,avgrho_allbox,avgrho_allbox_notilde,hub_allbox_notilde,avglorentz_allbox)
     do k=1,nx
        do j=1,nx
           do i=1,nx
@@ -229,10 +220,6 @@ contains
                      call calc_up_down_ND(4,sigddijk,gUUmunu,sigUdijk)
                  endif
              endif
-             !
-             ! calculate volume of each nsphere spheres at t=0, will be read from file for other times !
-             if (abs(time-tinitial) < eps_t) call calc_average_within_radius_manyspheres(xi,xj,xk,rad,nspheres,randorigins,&
-                  & detgijk,dx,1,vDbt0,(/ lorentzijk /))
 
              if (gotrho) then
                 !
@@ -452,22 +439,6 @@ contains
     ! --------------------------------------------------------------------------------
     if (constraints_l1norm) call get_L1_constraint_violation(nx,it,time,Hamraw,Hamescale2,magMom2,Momescale2)
     !if (constraints_l2norm) call get_L2_constraint_violation(nx,it,time,Hamraw,Hamescale2,magMom2,Momescale2)
-
-    ! --------------------------------------------------------------------------------
-    !
-    ! Write t=0 things we need: rho, volume
-    !
-    ! --------------------------------------------------------------------------------
-    if (abs(time-tinitial) < eps_t) then
-       call print_info(" Writing t = t_init data: "//trim(rho0file)//', '//trim(volt0file),loc)
-       open(newunit=unitr0,file=rho0file,status='replace')
-       open(newunit=unitv0,file=volt0file,status='replace')
-       rho0  = avgs(3,:) ! avg rho
-       write(unitr0,*) rho0
-       write(unitv0,*) vDbt0
-       close(unitr0)
-       close(unitv0)
-    endif
 
     ! --------------------------------------------------------------------------------
     !

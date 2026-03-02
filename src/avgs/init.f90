@@ -7,7 +7,8 @@ module init
   !        - Read in t = 0 data for volume, density
   !
   use options, only:pi,dtfac,c_double,tinitial,dit,&
-      tderivs,sphere_rseed,looprad,radmax,nord_dt,clen,domain_type
+      tderivs,sphere_rseed,looprad,radmax,nord_dt,clen,domain_type,&
+      read_domain_origins,origins_fname
   use manipulations, only:trace
   use prints, only:print_error,print_info
   use tripreports, only:filename_avg
@@ -24,7 +25,7 @@ contains
   !      - setup and define spheres for averagine (if required)
   !
   subroutine initialise(nx,nspheres,rad,time,xmin,xmax,dx,gotrho,xvals,randorigins,&
-       dt,it,notearly,volt0file,rho0file)
+       dt,it,notearly)
     integer, intent(in) :: nx,nspheres
     real(c_double), intent(in) :: rad,xmin,xmax,dx,time
     logical, intent(in) :: gotrho
@@ -32,7 +33,6 @@ contains
     real(c_double), intent(out) :: xvals(nx),dt,randorigins(3,nspheres)
     integer, intent(out) :: it
     logical, intent(inout) :: notearly
-    character(len=clen), intent(out) :: volt0file,rho0file ! filenames for some tinitial things we need
 
     real(c_double) :: maxorigin,minorigin,randnums(3,nspheres),t1,t2,t3,t4
     real(c_double) :: t_thresh
@@ -70,16 +70,6 @@ contains
     enddo
     dt = dtfac * dx
     it = nint((time-tinitial)/dt) ! this can be just *below* the it we want when dt is small, so need nint()
-
-
-    ! ----------------------------------------------------
-    !
-    ! Set filenames for t=tinitial data we need if averaging
-    !
-    ! ----------------------------------------------------
-    rho0file  = filename_avg('rhoavg_t0',0,rad,nspheres,domain_type) ! setting it=0 here
-    volt0file = filename_avg('volume_t0',0,rad,nspheres,domain_type) ! since these are always for it=0 data
-
 
     ! ----------------------------------------------------
     !
@@ -128,49 +118,76 @@ contains
 
     ! ----------------------------------------------------
     !
-    ! Build random origins for averaging
+    ! Build random origins for averaging // or read from a file
     !
     ! ----------------------------------------------------
 
     if (rad==0.) then
-       call print_info("    Averaging over the WHOLE BOX ",loc)
-       randorigins = 0.d0
-   elseif (rad>0. .and. nspheres==1) then
-       !
-       ! Set origin to be centre for single sphere -- can be changed in future
-       !
-       randorigins = (xmax + xmin) / 2.d0
-       write(message,"(a,f10.5)") "    Averaging over ONE "//trim(domain_type)//" with radius = ",rad !," Mpc "
-       call print_info(message,loc)
-       write(message,"(a,f10.5,a,f10.5,a,f10.5)") "    With origin: x = ",randorigins(1,1),", y = ",randorigins(2,1),&
-            ", z = ",randorigins(3,1)
-       call print_info(message,loc)
+        !
+        ! We want the whole box average; no subdomains
+        !
+        call print_info("    Averaging over the WHOLE BOX ",loc)
+        randorigins = 0.d0
+    elseif (rad>0. .and. nspheres==1) then
+        !
+        ! Set origin to be centre for single sphere -- can be changed in future
+        !
+        randorigins = (xmax + xmin) / 2.d0
+        write(message,"(a,f10.5)") "    Averaging over ONE "//trim(domain_type)//" with radius = ",rad !," Mpc "
+        call print_info(message,loc)
+        write(message,"(a,f10.5,a,f10.5,a,f10.5)") "    With origin: x = ",randorigins(1,1),", y = ",randorigins(2,1),&
+                ", z = ",randorigins(3,1)
+        call print_info(message,loc)
 
     else
-       if (looprad) then
-           maxorigin = xmax - radmax  ! All sphere origins should be in the same range
-           minorigin = xmin + radmax
-       else
-           maxorigin = xmax - rad  ! if randnum = 1 --> we want this number
-           minorigin = xmin + rad  ! if randnum = 0 --> we want this number
-       endif
-       call init_random_seed(sphere_rseed)
-       call RANDOM_NUMBER(randnums)
-       randorigins = (1.d0 - randnums) * minorigin + randnums * maxorigin
-       write(message,"(a,i6,a,f10.5)") "    Averaging over ",nspheres," "//trim(domain_type)//"s with radii = ",rad !," Mpc "
-       call print_info(message,loc)
+        !
+        ! We want many spheres; first check if we want to read them from file or not
+        !
+        if (looprad) then
+            maxorigin = xmax - radmax  ! All sphere origins should be in the same range
+            minorigin = xmin + radmax
+        else
+            maxorigin = xmax - rad  ! if randnum = 1 --> we want this number
+            minorigin = xmin + rad  ! if randnum = 0 --> we want this number
+        endif
+        ! Give some info
+        write(message,"(a,i6,a,f10.5)") "    Averaging over ",nspheres," "//trim(domain_type)//"s with radii = ",rad !," Mpc "
+        call print_info(message,loc)
 
-       !if (time==tinitial) then
-      !
-      ! Write origins of spheres to file
-      write(originsfile,"(a,i4.4,a,i4.4,a)") trim(domain_type)//'_origins_r',int(rad),'_nsph',nspheres,'.dat'
-      open(file=originsfile,newunit=ounit,status='replace')
-      write(ounit,*) "# x, y, z (radius = ",rad,", nspheres = ",nspheres,")"
-      do i=1,nspheres
-         write(ounit,*) randorigins(:,i)
-      enddo
-      close(ounit)
-      call print_info("    With many different origins written to: "//trim(originsfile),loc)
+        if (read_domain_origins) then
+            !
+            ! Read the origins from a file
+            !
+            call print_info("    With many different origins read from: "//trim(origins_fname),loc)
+            ! open the file
+            open(file=origins_fname,newunit=ounit,status='old')
+            do i=1,nspheres
+                read(ounit,*) randorigins(:,i)
+            enddo
+            close(ounit)
+            ! check if any of the origins are too close to the boundary
+            if (any(randorigins>maxorigin) .or. any(randorigins<minorigin)) then
+                call print_info(" Some of your chosen spheres will overlap the boundary (I cant deal with that yet). Fix it pls.",loc)
+            endif
+        else
+            !
+            ! Draw the random numbers for the sphere origins
+            !
+            call init_random_seed(sphere_rseed)
+            call RANDOM_NUMBER(randnums)
+            randorigins = (1.d0 - randnums) * minorigin + randnums * maxorigin
+            !
+            ! Write origins of spheres to file -- if we didnt read from one
+            write(originsfile,"(a,i4.4,a,i4.4,a)") trim(domain_type)//'_origins_r',int(rad),'_nsph',nspheres,'.dat'
+            open(file=originsfile,newunit=ounit,status='replace')
+            write(ounit,*) "# x, y, z (radius = ",rad,", nspheres = ",nspheres,")"
+            do i=1,nspheres
+                write(ounit,*) randorigins(:,i)
+            enddo
+            close(ounit)
+            call print_info("    With many different origins written to: "//trim(originsfile),loc)
+        endif
+
     endif
 
     call print_info(" Done initialising. ",loc)
@@ -185,6 +202,8 @@ contains
   !
   !    --> Looks for a file which will be output by mescaline when run on t = tinitial data
   !           if the file doesn't exist: we display an error message, and continue with approximate values
+  !
+  !  ** deprecated **  // leaving here for funsies
   !
   subroutine get_t0_data(nspheres,rad,xmin,xmax,f1,f2,data1,data2)
     integer, intent(in) :: nspheres

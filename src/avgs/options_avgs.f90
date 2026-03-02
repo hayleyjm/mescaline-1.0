@@ -26,7 +26,7 @@ module options
   !    (most of these can be found in the .par file of the simulation)
   !
   ! -----------------------------------------------------------------------------
-  real(c_double), parameter :: tinitial = 0.5966092901089324     ! initial time
+  real(c_double), parameter :: tinitial = 2.6168031077368945     ! initial time
   real(c_double), parameter ::    dtfac = 0.1                     ! Courant factor: dt = dtfac * dx
   !
   ! Specify parameters of the initial FLRW background of the simulation ICs
@@ -74,12 +74,14 @@ module options
   ! For a single radius of averaging
   !   --> To set up an all-box average; set radius = 0. AND nspheres = 1
   !
-  integer,        parameter ::     nspheres = 10           ! number of spheres to average over
-  real(c_double), parameter ::       radius = 0.1         ! radius of averaging, if single radius
+  integer,        parameter ::     nspheres = 3           ! number of spheres to average over
+  real(c_double), parameter ::       radius = 0.2         ! radius of averaging, if single radius
   integer,        parameter :: sphere_rseed = 762361     ! random seed to draw origins of spheres. So long as nspheres and this stay constant, same origins will be drawn.
   ! Type of domain to average; allowed: "sphere", "cube"
   !      (if cube:, "radius" above is L/2 of cube side and nspheres=ncubes, origins drawn in same way)
-  character(len=clen), parameter :: domain_type = "sphere"
+  character(len=clen), parameter ::   domain_type = "sphere"
+  logical, parameter ::       read_domain_origins = .True.   ! read in the origins of your domains from a file? if no; draw randomly via sphere_rseed
+  character(len=clen), parameter :: origins_fname = "my_domain_origins.txt" ! if read_domain_origins=True; read from this file. Format is x,y,z position with nrows=nspheres
   !
   ! For a loop over several averaging radii
   logical,        parameter :: looprad = .False.  ! loop over several radii of averaging?
@@ -131,7 +133,7 @@ module options
   !
   ! -----------------------------------------------------------------------------
   ! ainit is NOT needed for simulation runs
-  real(c_double), parameter ::    ainit = 0.000999000999000999   ! initial scale factor
+  real(c_double), parameter ::    ainit = 0.009900990099009901   ! initial scale factor
   ! box_size is only used for get_rho_init calculation
   real(c_double), parameter :: box_size = 1.0   ! length of domain in code units
 

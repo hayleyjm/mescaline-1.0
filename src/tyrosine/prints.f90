@@ -78,7 +78,7 @@ contains
   subroutine print_compliment()
       use random, only:get_randnums
       use options, only:clen
-      integer, parameter :: n=24 ! number of compliments
+      integer, parameter :: n=35 ! number of compliments
       real(c_double) :: randnums(1)
       integer :: rn
       character(len=clen) :: comps(n),loc
@@ -107,8 +107,21 @@ contains
       comps(21) = "Cool 'tude"
       comps(22) = "You diiiiid it"
       comps(23) = "You are great at cooking"
-      comps(24) = "Like this? Add your own compliments in prints.f90"
-      
+      comps(24) = "It's not as bad as you think"
+      comps(25) = "Hey! Nice!"
+      comps(26) = "See - that wasnt so bad?! "
+      comps(27) = "You have lots of useful talents"
+      comps(28) = "Keep doing that thing"
+      comps(29) = "Fabulous!!"
+      comps(30) = "Heck yeah, pal"
+      comps(31) = "Woa that was awesome!"
+      comps(32) = "WOW what a ride"
+      comps(33) = "You are cool"
+      comps(34) = "I knew you could do it!!"
+      ! ... add more compliments here -- be sure to change n above !!
+
+      comps(n) = "Like this? Add your own compliments in tyrosine/prints.f90"
+
       ! call to get ONE random number in range (0,1)
       call get_randnums(1,randnums)
       ! scale this to be an integer between (1,n)
