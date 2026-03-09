@@ -167,7 +167,7 @@ contains
             close(ounit)
             ! check if any of the origins are too close to the boundary
             if (any(randorigins>maxorigin) .or. any(randorigins<minorigin)) then
-                call print_info(" Some of your chosen spheres will overlap the boundary (I cant deal with that yet). Fix it pls.",loc)
+                call print_info(" Some of your chosen spheres will overlap the boundary (I cant deal with that yet)",loc)
             endif
         else
             !
