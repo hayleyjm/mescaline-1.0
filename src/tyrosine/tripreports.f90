@@ -5,7 +5,7 @@ module tripreports
   !
   ! note: working version of HDF5 output is in tripreports_hdf5
   !
-  use options, only:c_double,dit,clen,tinitial
+  use options, only:c_double,dit,clen,tinitial,tderivs,nord_dt
   use prints, only:print_info,print_error
   implicit none
   character(len=100) :: message
@@ -460,8 +460,8 @@ contains
   ! * can also pass multiple quantities to multiple files, this will assume size(quantity)=size(filename)
   ! and write them respectively, i.e. quantity(1) goes into filename(1), with header(1)
   !
-  subroutine write_avg(quantity,ident,it,time,nspheres,radius,domain_type,header,randorigins)
-    integer, intent(in) :: nspheres,it
+  subroutine write_avg(quantity,ident,it,time,nargs,nspheres,radius,domain_type,header,randorigins)
+    integer, intent(in) :: nspheres,it,nargs ! nargs is # of command line arguments from mescaline
     real(c_double), intent(in) :: quantity(nspheres), time, radius
     character(len=*), intent(in) :: ident ! identifier of whatever we are writing
     character(len=*), intent(in) :: domain_type ! type of domain we are averaging over
@@ -470,24 +470,41 @@ contains
 
     character(len=clen) :: filename
     integer :: unit
+    logical :: writehead
 
     filename = filename_avg(ident,it,radius,nspheres,domain_type)
 
     open(newunit=unit,file=filename,status='replace')
     call print_info(" Writing to "//trim(filename),loc)
-    if (time==tinitial) then   ! We want to write randorigins and header to file
-       if (radius/=0.) then    ! We have one sphere with rad/=0.
-          if (present(randorigins)) then
-              write(unit,"(a,i4.4,a)") '# coordinate, origin(1), origin(2), ... origin(',nspheres,')'
-              write(unit,*) '# x', randorigins(1,:)
-              write(unit,*) '# y', randorigins(2,:)
-              write(unit,*) '# z', randorigins(3,:)
-          endif
-          if (present(header)) write(unit,"(a,a,a,i4.4,a)") '# ',header,'(1 ...',nspheres,')'
-       else                    ! we have rad=0. (whole box avg)
-          write(unit,"(a)") '# whole box average '
-          if (present(header)) write(unit,"(a,a,a,i4.4,a)") '# ',header
-       endif
+    !
+    ! write header to a file if we are only running for one time
+    !          (this is tderivs=False and ntimes=1 or tderivs=True and ntimes=nord_dt+1)
+    !    * or * if time is tinitial
+    !
+    writehead = .False.
+    if (tderivs .eqv. .False.) then
+        ! no time derivs; if we only have one command line argument
+        if (nargs==1) writehead = .True.
+    elseif (tderivs .eqv. .True.) then
+        ! time derivs are true; but weve passed nord_dt+1, i.e. we are still running on only one file
+        if (nargs==nord_dt+1) writehead = .True.
+    elseif (time==tinitial) then
+        writehead = .True.
+    endif
+    !
+    if (writehead) then
+        if (radius/=0.) then    ! We have one sphere with rad/=0.
+            if (present(randorigins)) then
+                write(unit,"(a,i4.4,a)") '# coordinate, origin(1), origin(2), ... origin(',nspheres,')'
+                write(unit,*) '# x', randorigins(1,:)
+                write(unit,*) '# y', randorigins(2,:)
+                write(unit,*) '# z', randorigins(3,:)
+            endif
+            if (present(header)) write(unit,"(a,a,a,i4.4,a)") '# ',header,'(1 ...',nspheres,')'
+        else                    ! we have rad=0. (whole box avg)
+            write(unit,"(a)") '# whole box average '
+            if (present(header)) write(unit,"(a,a,a,i4.4,a)") '# ',header
+        endif
     endif
     write(unit,*) time, quantity
     close(unit)

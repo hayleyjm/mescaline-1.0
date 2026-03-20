@@ -506,9 +506,9 @@ contains
   !    subroutine to calculate backreaction terms and omegas from avgs
   !  -- uses Buchert+ 2018's new formalism via private communication --
   !
-  subroutine get_backreaction_omegas(it,time,rad,nspheres,randorigins,avgs,lenavgs,rhoavgall,rhoavgall_notilde,&
+  subroutine get_backreaction_omegas(it,time,nargs,rad,nspheres,randorigins,avgs,lenavgs,rhoavgall,rhoavgall_notilde,&
        & vDball,Qd,hub,omegam,omegaR,omegaQ,delta,aDb)
-    integer, intent(in) :: nspheres,lenavgs,it ! the number of average values we have
+    integer, intent(in) :: nspheres,lenavgs,it,nargs ! lenavgs is the number of average values we have
     real(c_double), intent(in)    :: time,rad,vDball
     real(c_double), intent(in), dimension(3,nspheres) :: randorigins
     real(c_double), intent(inout) :: avgs(lenavgs,nspheres),rhoavgall,rhoavgall_notilde
@@ -536,11 +536,11 @@ contains
 
     ! write Qd terms if we want them
     if (writeQdterms) then
-        call write_avg(avgs(5,:),"theta2_avg",it,time,nspheres,rad,domain_type,&
+        call write_avg(avgs(5,:),"theta2_avg",it,time,nargs,nspheres,rad,domain_type,&
             & "\eta, <\Theta^2>",randorigins)
-        call write_avg(avgs(4,:),"sigma2_avg",it,time,nspheres,rad,domain_type,&
+        call write_avg(avgs(4,:),"sigma2_avg",it,time,nargs,nspheres,rad,domain_type,&
             & "\eta, <\sigma^2>",randorigins)
-        call write_avg(avgs(6,:),"omega2_avg",it,time,nspheres,rad,domain_type,&
+        call write_avg(avgs(6,:),"omega2_avg",it,time,nargs,nspheres,rad,domain_type,&
             & "\eta, <\omega^2>",randorigins)
     endif
 

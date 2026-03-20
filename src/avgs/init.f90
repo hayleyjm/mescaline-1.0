@@ -176,17 +176,18 @@ contains
             call init_random_seed(sphere_rseed)
             call RANDOM_NUMBER(randnums)
             randorigins = (1.d0 - randnums) * minorigin + randnums * maxorigin
-            !
-            ! Write origins of spheres to file -- if we didnt read from one
-            write(originsfile,"(a,i4.4,a,i4.4,a)") trim(domain_type)//'_origins_r',int(rad),'_nsph',nspheres,'.dat'
-            open(file=originsfile,newunit=ounit,status='replace')
-            write(ounit,*) "# x, y, z (radius = ",rad,", nspheres = ",nspheres,")"
-            do i=1,nspheres
-                write(ounit,*) randorigins(:,i)
-            enddo
-            close(ounit)
-            call print_info("    With many different origins written to: "//trim(originsfile),loc)
         endif
+
+        !
+        ! Write origins of spheres to file
+        write(originsfile,"(a,i4.4,a,i4.4,a)") trim(domain_type)//'_origins_r',int(rad),'_nsph',nspheres,'.dat'
+        open(file=originsfile,newunit=ounit,status='replace')
+        write(ounit,*) "# x, y, z (radius = ",rad,", nspheres = ",nspheres,")"
+        do i=1,nspheres
+            write(ounit,*) randorigins(:,i)
+        enddo
+        close(ounit)
+        call print_info("    With many different origins written to: "//trim(originsfile),loc)
 
     endif
 

@@ -281,8 +281,8 @@ contains
   ! a routine to calculate the L1 error (raw and/or rel) for the constraint violation
   !       and write these to a file -- called from AFTER the spatial loop in ricci
   !
-  subroutine get_L1_constraint_violation(nx,it,time,Hamraw,Hescale2,magMom2,Momescale2)
-    integer, intent(in) :: nx,it
+  subroutine get_L1_constraint_violation(nx,it,time,nargs,Hamraw,Hescale2,magMom2,Momescale2)
+    integer, intent(in) :: nx,it,nargs
     real(c_double), intent(in) :: time
     real(c_double), dimension(nx,nx,nx), intent(in) :: Hamraw,Hescale2,magMom2,Momescale2
 
@@ -326,8 +326,8 @@ contains
        call print_info(message,loc)
 
        ! last string is "domain_type" -- here this is always all box
-       call write_avg((/ HamL1raw /),'Ham_L1error_raw',it,time,1,tmprad,"all")
-       call write_avg((/ MomL1raw /),'Mom_L1error_raw',it,time,1,tmprad,"all")
+       call write_avg((/ HamL1raw /),'Ham_L1error_raw',it,time,nargs,1,tmprad,"all")
+       call write_avg((/ MomL1raw /),'Mom_L1error_raw',it,time,nargs,1,tmprad,"all")
 
     elseif (rawandrelHM) then
        !
@@ -342,10 +342,10 @@ contains
        write(message,"(a,ES15.8)") "   --> L1 M/[M] violation = ",MomL1rel
        call print_info(message,loc)
 
-       call write_avg((/ HamL1rel /),'Ham_L1error_rel',it,time,1,tmprad,"all")
-       call write_avg((/ MomL1rel /),'Mom_L1error_rel',it,time,1,tmprad,"all")
-       call write_avg((/ HamL1raw /),'Ham_L1error_raw',it,time,1,tmprad,"all")
-       call write_avg((/ MomL1raw /),'Mom_L1error_raw',it,time,1,tmprad,"all")
+       call write_avg((/ HamL1rel /),'Ham_L1error_rel',it,time,nargs,1,tmprad,"all")
+       call write_avg((/ MomL1rel /),'Mom_L1error_rel',it,time,nargs,1,tmprad,"all")
+       call write_avg((/ HamL1raw /),'Ham_L1error_raw',it,time,nargs,1,tmprad,"all")
+       call write_avg((/ MomL1raw /),'Mom_L1error_raw',it,time,nargs,1,tmprad,"all")
 
     else
        !
@@ -355,8 +355,8 @@ contains
        write(message,"(a,ES15.8)") "   --> L1 M/[M] violation = ",MomL1rel
        call print_info(message,loc)
 
-       call write_avg((/ HamL1rel /),'Ham_L1error_rel',it,time,1,tmprad,"all")
-       call write_avg((/ MomL1rel /),'Mom_L1error_rel',it,time,1,tmprad,"all")
+       call write_avg((/ HamL1rel /),'Ham_L1error_rel',it,time,nargs,1,tmprad,"all")
+       call write_avg((/ MomL1rel /),'Mom_L1error_rel',it,time,nargs,1,tmprad,"all")
 
     endif
 
@@ -370,8 +370,8 @@ contains
   ! a routine to calculate the L2 norm (rel ONLY) for the constraint violation
   !       and write these to a file -- called from AFTER the spatial loop in ricci
   !
-  subroutine get_L2_constraint_violation(nx,it,time,Hamraw,Hescale2,magMom2,Momescale2)
-    integer, intent(in) :: nx,it
+  subroutine get_L2_constraint_violation(nx,it,time,nargs,Hamraw,Hescale2,magMom2,Momescale2)
+    integer, intent(in) :: nx,it,nargs
     real(c_double), intent(in) :: time
     real(c_double), dimension(nx,nx,nx), intent(in) :: Hamraw,Hescale2,magMom2,Momescale2
 
@@ -414,8 +414,8 @@ contains
        write(message,"(a,ES15.8)") "   --> L2 M violation = ",MomL2raw
        call print_info(message,loc)
 
-       call write_avg((/ HamL2raw /),'Ham_L2error_raw',it,time,1,tmprad,"all")
-       call write_avg((/ MomL2raw /),'Mom_L2error_raw',it,time,1,tmprad,"all")
+       call write_avg((/ HamL2raw /),'Ham_L2error_raw',it,time,nargs,1,tmprad,"all")
+       call write_avg((/ MomL2raw /),'Mom_L2error_raw',it,time,nargs,1,tmprad,"all")
 
     elseif (rawandrelHM) then
        !
@@ -430,10 +430,10 @@ contains
        write(message,"(a,ES15.8)") "   --> L2 M/[M] violation = ",MomL2rel
        call print_info(message,loc)
 
-       call write_avg((/ HamL2rel /),'Ham_L2error_rel',it,time,1,tmprad,"all")
-       call write_avg((/ MomL2rel /),'Mom_L2error_rel',it,time,1,tmprad,"all")
-       call write_avg((/ HamL2raw /),'Ham_L2error_raw',it,time,1,tmprad,"all")
-       call write_avg((/ MomL2raw /),'Mom_L2error_raw',it,time,1,tmprad,"all")
+       call write_avg((/ HamL2rel /),'Ham_L2error_rel',it,time,nargs,1,tmprad,"all")
+       call write_avg((/ MomL2rel /),'Mom_L2error_rel',it,time,nargs,1,tmprad,"all")
+       call write_avg((/ HamL2raw /),'Ham_L2error_raw',it,time,nargs,1,tmprad,"all")
+       call write_avg((/ MomL2raw /),'Mom_L2error_raw',it,time,nargs,1,tmprad,"all")
 
     else
        !
@@ -443,8 +443,8 @@ contains
        write(message,"(a,ES15.8)") "   --> L2 M/[M] violation = ",MomL2rel
        call print_info(message,loc)
 
-       call write_avg((/ HamL2rel /),'Ham_L2error_rel',it,time,1,tmprad,"all")
-       call write_avg((/ MomL2rel /),'Mom_L2error_rel',it,time,1,tmprad,"all")
+       call write_avg((/ HamL2rel /),'Ham_L2error_rel',it,time,nargs,1,tmprad,"all")
+       call write_avg((/ MomL2rel /),'Mom_L2error_rel',it,time,nargs,1,tmprad,"all")
 
     endif
 

@@ -35,9 +35,9 @@ contains
   !      - constraint violation
   !      - write main 3D output files
   !
-  subroutine compute_ricci(nx,nt,dx,xmax,xmin,rad,nspheres,gij,kij,rho,vel0,vel1,vel2,alp,times,&
+  subroutine compute_ricci(nx,nt,nargs,dx,xmax,xmin,rad,nspheres,gij,kij,rho,vel0,vel1,vel2,alp,times,&
        gotrho,gotalp,dens)
-    integer, intent(in) :: nx,nt,nspheres
+    integer, intent(in) :: nx,nt,nargs,nspheres
     ! NOTE: ordering of times is e.g. (t_n-3, t_n-2, t_n-1, t_n) for nord_dt = nt = 4
     real(c_double), intent(in) :: gij(6,nx,nx,nx,nt),kij(6,nx,nx,nx,nt),alp(nx,nx,nx)
     real(c_double), intent(in) :: times(nt),dx,rad,xmax,xmin,dens(nx,nx,nx)
@@ -423,7 +423,7 @@ contains
     ! --------------------------------------------------------------------------------
 
     call print_info("  Calculating backreaction terms and cosmological parameters ... ",loc)
-    call get_backreaction_omegas(it,time,rad,nspheres,randorigins,avgs,navgs,avgrho_allbox,&
+    call get_backreaction_omegas(it,time,nargs,rad,nspheres,randorigins,avgs,navgs,avgrho_allbox,&
          & avgrho_allbox_notilde,avglorentz_allbox,Qd,hub,omegam,omegaR,omegaQ,delta,aDb)
     if (nspheres<10) then
        write(message,"(a,ES14.7)") "      <rho>_D(all) = ",avgrho_allbox
@@ -437,8 +437,8 @@ contains
     ! Get L1/L2 error for constraints -- and writes to files (scalars)
     !
     ! --------------------------------------------------------------------------------
-    if (constraints_l1norm) call get_L1_constraint_violation(nx,it,time,Hamraw,Hamescale2,magMom2,Momescale2)
-    !if (constraints_l2norm) call get_L2_constraint_violation(nx,it,time,Hamraw,Hamescale2,magMom2,Momescale2)
+    if (constraints_l1norm) call get_L1_constraint_violation(nx,it,time,nargs,Hamraw,Hamescale2,magMom2,Momescale2)
+    !if (constraints_l2norm) call get_L2_constraint_violation(nx,it,time,nargs,Hamraw,Hamescale2,magMom2,Momescale2)
 
     ! --------------------------------------------------------------------------------
     !
@@ -644,30 +644,30 @@ contains
 
     call print_info(" Writing scalar (averaged) data ... ",loc)
     if (writeomegas) then
-       call write_avg(omegam,"omegam",it,time,nspheres,rad,domain_type,&
+       call write_avg(omegam,"omegam",it,time,nargs,nspheres,rad,domain_type,&
         & "\eta, \Omega_{m}",randorigins)
-       call write_avg(omegaR,"omegaR",it,time,nspheres,rad,domain_type,&
+       call write_avg(omegaR,"omegaR",it,time,nargs,nspheres,rad,domain_type,&
         & "\eta, \Omega_{R}",randorigins)
-       call write_avg(omegaQ,"omegaQ",it,time,nspheres,rad,domain_type,&
+       call write_avg(omegaQ,"omegaQ",it,time,nargs,nspheres,rad,domain_type,&
         & "\eta, \Omega_{Q}",randorigins)
     endif
 
-    if (writeaD) call write_avg(aDb,"aDb",it,time,nspheres,rad,domain_type,&
+    if (writeaD) call write_avg(aDb,"aDb",it,time,nargs,nspheres,rad,domain_type,&
         & "\eta, a_{D}^{b}",randorigins)
     if (writehubble) then
         ! Write Hubble parameter:
-        call write_avg(hub,"hubble",it,time,nspheres,rad,domain_type,&
+        call write_avg(hub,"hubble",it,time,nargs,nspheres,rad,domain_type,&
             & "\eta, H_{D}",randorigins)
         if (writetilde .eqv. .False.) then
             ! write global Hubble from NON tilde theta as well
             !    --> normalise: in loop it's just <Theta>, so need to norm by \Gam and 3
             hub_allbox_notilde = hub_allbox_notilde / (3._dp * avglorentz_allbox)
-            call write_avg((/ hub_allbox_notilde /),"hubble_notilde",it,time,1,&
+            call write_avg((/ hub_allbox_notilde /),"hubble_notilde",it,time,nargs,1,&
                 & tmprad,"all","\eta, H_{D} (all, no tilde)",randorigins)
         endif
     endif
     if (writedelta .and. rad/=0.) then
-       call write_avg(delta,"delta",it,time,nspheres,rad,domain_type,&
+       call write_avg(delta,"delta",it,time,nargs,nspheres,rad,domain_type,&
         & "\eta, <rho>^b_D/bar{rho} - 1 (\delta)",randorigins)
     endif
 

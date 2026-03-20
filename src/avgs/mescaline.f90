@@ -245,7 +245,7 @@ program mescaline
        !
        ! -------------------------------------------------------------------
        call print_info(" Sending data for analysis ... ",loc)
-       call send_for_analysis(nx,nfiles,times,xmax,xmin,dx,gij,kij,alp,vel0,vel1,vel2,rho,dens)
+       call send_for_analysis(nx,nfiles,nargs,times,xmax,xmin,dx,gij,kij,alp,vel0,vel1,vel2,rho,dens)
 
        !
        ! Keep some data for next loop, if we want, before deallocating
