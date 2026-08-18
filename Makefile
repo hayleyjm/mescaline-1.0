@@ -6,6 +6,9 @@
 mescaline:
 	@cd build; ${MAKE} ${MAKECMDGOALS}
 
+readwrite:
+	@cd build; ${MAKE} ${MAKECMDGOALS}
+
 clean:
 	@cd build; ${MAKE} clean
 

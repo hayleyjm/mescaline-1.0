@@ -10,7 +10,8 @@
 # -------------------------------------
 TYDIR=../src/tyrosine
 AVGSDIR=../src/avgs
-VPATH=$(AVGSDIR) $(TYDIR) $(SPLASH_DIR)/src
+RWDIR=../src/readwrite
+VPATH=$(AVGSDIR) $(RWDIR) $(TYDIR) $(SPLASH_DIR)/src
 SHELL=/bin/bash
 
 BINDIR=../bin
@@ -76,6 +77,11 @@ spines.f90 $(TRIP_FILE) violation.f90 riemann.f90 weyl.f90
 AVGS_FILES=options_avgs.f90 $(MOD_FILES) init.f90 roots.f90 ricci.f90 cactoid.f90 analysis.f90 mescaline.f90
 OBJ_AVGS=read_data_cactus_hdf5_utils.o $(AVGS_FILES:.f90=.o)
 
+#
+# Files used in the read/write case (no analysis)
+RW_FILES=options_rw.f90 params.f90 $(SPLASH_FILES) random.f90 prints.f90 $(TRIP_FILE) tools_rw.f90 cactoid.f90 mescaline_rw.f90
+OBJ_RW=read_data_cactus_hdf5_utils.o $(RW_FILES:.f90=.o)
+
 # -------------------------------------
 # Now compile...
 # -------------------------------------
@@ -88,6 +94,12 @@ OBJ_AVGS=read_data_cactus_hdf5_utils.o $(AVGS_FILES:.f90=.o)
 mescaline: $(OBJ_AVGS)
 	$(FC) $(FFLAGS) -o $(BINDIR)/mescaline $(OBJ_AVGS) $(LDFLAGS) $(HDF5LIBS) $(EXTLIBZ)
 
+## Mescaline read/write ET files (spit right back out into trips; no analysis)
+.PHONY: readwrite
+readwrite: mescaline_rw
+mescaline_rw: $(OBJ_RW)
+	$(FC) $(FFLAGS) -o $(BINDIR)/mescaline_rw $(OBJ_RW) $(LDFLAGS) $(HDF5LIBS) $(EXTLIBZ)
+
 
 ## Dependencies for splash HDF5 read
 read_data_cactus_hdf5_utils.o: $(SPLASH_DIR)/src/read_data_cactus_hdf5_utils.c
@@ -95,7 +107,7 @@ read_data_cactus_hdf5_utils.o: $(SPLASH_DIR)/src/read_data_cactus_hdf5_utils.c
 
 read_data_cactus_hdf5_utils.c: checkhdf5 checksplash
 
-## Clean up some things 
+## Clean up some things
 .PHONY: clean cleanhard
 clean:
 	rm *.o *.mod
